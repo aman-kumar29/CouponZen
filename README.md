@@ -1,6 +1,6 @@
-# yt_summarizer
+# CouponZen
 
-A simple application which can summarize youtube videos from a link
+A simple application to store and retrieve all your coupons!!
 
 ## Steps to start up the python fastapi server
  - ```pip install -r requirements.txt```

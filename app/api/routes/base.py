@@ -5,7 +5,7 @@ router = APIRouter()
 
 @router.get("/", tags=["Base"])
 async def root():
-    return {"message": "Welcome to the YouTube Chat Summarizer API 🚀"}
+    return {"message": "Welcome to the CouponZen API 🚀"}
 
 @router.get("/health", tags=["Base"])
 async def health_check():
