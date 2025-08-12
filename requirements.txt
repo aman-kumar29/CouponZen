@@ -1,3 +1,9 @@
 fastapi
 uvicorn[standard]
 python-dotenv
+authlib
+python-jose[cryptography] 
+sqlmodel
+asyncpg
+passlib[bcrypt]
+requests
