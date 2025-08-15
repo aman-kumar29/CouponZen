@@ -7,3 +7,6 @@ sqlmodel
 asyncpg
 passlib[bcrypt]
 requests
+sqlalchemy>=2.0
+psycopg[binary]
+alembic
