@@ -10,6 +10,8 @@ from app.core.exceptions import (
     validation_exception_handler,
     internal_error_handler,
 )
+from app.db.session import Base, engine
+
 
 logger = setup_logger(__name__)
 app = FastAPI(title="CouponZen")
@@ -30,12 +32,20 @@ app.add_exception_handler(Exception, internal_error_handler)
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("🚀 FastAPI server starting up...")
+    try:
+        logger.info("🚀 FastAPI server starting up...")
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully.")
+    except Exception as e:
+        logger.error(f"Error during startup: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.info("🛑 FastAPI server shutting down...")
-
+    try:
+        logger.info("🛑 FastAPI server shutting down...")
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}")
+        
 # Routers
 app.include_router(base.router)
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])

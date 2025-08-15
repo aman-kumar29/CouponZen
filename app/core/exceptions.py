@@ -19,11 +19,11 @@ def create_error_response(status_code: int, message: str):
     )
 
 async def http_exception_handler(request: Request, exc: HTTPException):
-    logger.warning(f"HTTPException: {exc.detail}")
+    logger.warning(f"HTTPException: {exc.detail} | Path: {request.url.path} | Method: {request.method}")
     return create_error_response(exc.status_code, exc.detail)
 
 async def internal_error_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled Exception: {str(exc)}")
+    logger.error(f"Unhandled Exception: {str(exc)} | Path: {request.url.path} | Method: {request.method}")
     return create_error_response(HTTP_500_INTERNAL_SERVER_ERROR, "Internal Server Error")
 
 async def validation_exception_handler(request: Request, exc):

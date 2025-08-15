@@ -9,4 +9,5 @@ passlib[bcrypt]
 requests
 sqlalchemy>=2.0
 psycopg[binary]
+psycopg2-binary
 alembic
