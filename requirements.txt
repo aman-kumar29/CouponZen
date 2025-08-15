@@ -8,5 +8,6 @@ asyncpg
 passlib[bcrypt]
 requests
 sqlalchemy>=2.0
+psycopg2-binary
 psycopg[binary]
 alembic
