@@ -10,7 +10,7 @@ from app.core.exceptions import (
     validation_exception_handler,
     internal_error_handler,
 )
-from app.db.session import Base, engine
+from app.db.session import init_db
 
 
 logger = setup_logger(__name__)
@@ -34,7 +34,7 @@ app.add_exception_handler(Exception, internal_error_handler)
 async def startup_event():
     try:
         logger.info("🚀 FastAPI server starting up...")
-        Base.metadata.create_all(bind=engine)
+        await init_db()  # Initialize the database
         logger.info("Database tables created successfully.")
     except Exception as e:
         logger.error(f"Error during startup: {e}")

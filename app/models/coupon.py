@@ -7,17 +7,10 @@ from .enums import CouponSource
 
 class AppCoupon(SQLModel, table=True):
     __tablename__ = "app_coupons"
-    __table_args__ = (
-        UniqueConstraint("dedupe_hash", name="uq_app_coupons_dedupe"),
-        Index("idx_app_coupons_user_expires", "user_id", "expires_at"),
-        Index("idx_app_coupons_user_active", "user_id", "is_redeemed", "expires_at"),
-        Index("idx_app_coupons_brand", "brand"),
-    )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    user_id: uuid.UUID = Field(foreign_key="app_users.id", index=True, nullable=False)
-    inbound_item_id: Optional[uuid.UUID] = Field(default=None, foreign_key="app_inbound_items.id")
-
+    user_id: str = Field(foreign_key="app_users.id", index=True)
+    inbound_item_id: Optional[str] = Field(default=None, foreign_key="app_inbound_items.id")
     # Brand
     brand: str = Field(nullable=False)
     brand_id: Optional[uuid.UUID] = None  # future FK

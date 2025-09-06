@@ -13,12 +13,12 @@ class AppReminder(SQLModel, table=True):
     )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    user_id: uuid.UUID = Field(foreign_key="app_users.id", index=True, nullable=False)
-    coupon_id: uuid.UUID = Field(foreign_key="app_coupons.id", index=True, nullable=False)
-    channel: ReminderChannel = Field(default=ReminderChannel.PUSH, nullable=False)
-
-    scheduled_at: datetime = Field(nullable=False, index=True)
+    user_id: str = Field(foreign_key="app_users.id", index=True)
+    coupon_id: str = Field(foreign_key="app_coupons.id", index=True)
+    channel: ReminderChannel = Field(default=ReminderChannel.PUSH)
+    scheduled_at: datetime = Field(index=True)
     sent_at: Optional[datetime] = None
+    
     cancelled_at: Optional[datetime] = None
     retry_count: int = Field(default=0, nullable=False)
 

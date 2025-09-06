@@ -14,9 +14,8 @@ class AppInboundItem(SQLModel, table=True):
     )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    user_id: uuid.UUID = Field(foreign_key="app_users.id", index=True, nullable=False)
-    source: CouponSource = Field(nullable=False)
-
+    user_id: str = Field(foreign_key="app_users.id", index=True)
+    source: CouponSource = Field()
     raw_text: Optional[str] = None
     raw_url: Optional[str] = None
     media_uri: Optional[str] = None  # screenshot path

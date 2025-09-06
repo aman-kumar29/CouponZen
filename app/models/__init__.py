@@ -3,7 +3,7 @@ from .user import AppUser
 from .coupon import AppCoupon
 from .inbound_item import AppInboundItem
 from .reminder import AppReminder
-from .enums import CouponSource, ReminderChannel, ItemStatus  # re-export for convenience
+from .enums import CouponSource, ReminderChannel, ItemStatus
 
 __all__ = [
     "AppUser", "AppCoupon", "AppInboundItem", "AppReminder",
