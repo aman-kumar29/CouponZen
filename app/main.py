@@ -1,4 +1,4 @@
-# app/main.py
+# app/main.py (only the relevant parts changed)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
@@ -10,42 +10,52 @@ from app.core.exceptions import (
     validation_exception_handler,
     internal_error_handler,
 )
-from app.db.session import init_db
-
+from app.db.session import init_db  # <-- async init
+import os
 
 logger = setup_logger(__name__)
 app = FastAPI(title="CouponZen")
 
-# CORS
+db_initialized: bool | None = None
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change in production
+    allow_origins=["*"],  # tighten in prod
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Exception handlers
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, internal_error_handler)
 
 @app.on_event("startup")
 async def startup_event():
+    global db_initialized
+    logger.info("🚀 FastAPI server starting up...")
+    logger.info(f"GOOGLE_CLIENT_ID available: {bool(os.getenv('GOOGLE_CLIENT_ID'))}")
+    logger.info(f"Current working directory: {os.getcwd()}")
+    logger.info(f".env file exists: {os.path.exists('.env')}")
+
     try:
-        logger.info("🚀 FastAPI server starting up...")
-        await init_db()  # Initialize the database
-        logger.info("Database tables created successfully.")
+        await init_db()       # ✅ await the async DB init (creates tables if missing)
+        db_initialized = True
+        logger.info("✅ Database initialization successful")
     except Exception as e:
-        logger.error(f"Error during startup: {e}")
+        db_initialized = False
+        logger.error(f"❌ Database initialization failed: {e}", exc_info=True)
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    try:
-        logger.info("🛑 FastAPI server shutting down...")
-    except Exception as e:
-        logger.error(f"Error during shutdown: {e}")
-        
-# Routers
+    logger.info("🛑 FastAPI server shutting down...")
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "online",
+        "database": "connected" if db_initialized else "disconnected"
+    }
+
 app.include_router(base.router)
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])

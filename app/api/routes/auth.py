@@ -2,12 +2,20 @@
 from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import RedirectResponse, JSONResponse
 from jose import JWTError
-from app.core.config import GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI
+from app.core.config import (
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    GOOGLE_REDIRECT_URI,
+    JWT_SECRET_KEY
+)
+from app.core.logger import setup_logger
+
 from app.services.google_oauth import exchange_code_for_tokens, get_user_info
 from app.core.security import create_jwt_token, decode_jwt_token
 from app.services.user_service import upsert_google_user
 from app.services.token_service import issue_access_token, issue_refresh_token, validate_refresh_token
 
+logger = setup_logger(__name__)
 router = APIRouter()
 
 @router.get("/google")
@@ -17,8 +25,8 @@ def google_login():
         google_auth_url = (
             "https://accounts.google.com/o/oauth2/v2/auth"
             "?response_type=code"
-            f"&client_id={GOOGLE_CLIENT_ID}"
-            f"&redirect_uri={GOOGLE_REDIRECT_URI}"
+            f"&client_id={settings.GOOGLE_CLIENT_ID}"
+            f"&redirect_uri={settings.GOOGLE_REDIRECT_URI}"
             "&scope=openid%20email%20profile"
         )
         return RedirectResponse(google_auth_url)

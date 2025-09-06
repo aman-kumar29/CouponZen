@@ -8,7 +8,7 @@ class User(SQLModel, table=True):
     __tablename__ = "users"
     # indexes/uniques via __table_args__ handled by Field(unique=True, index=True)
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True, index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
 
     # Google OIDC identity (no passwords)
     email: str = Field(index=True, unique=True)

@@ -13,9 +13,9 @@ class Reminder(SQLModel, table=True):
         Index("idx_reminders_status", "status"),
     )
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True, index=True)
-    user_id: str = Field(foreign_key="users.id", index=True)
-    coupon_id: str = Field(foreign_key="coupons.id", index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
+    coupon_id: uuid.UUID = Field(foreign_key="coupons.id", index=True)
     
     # Notification details
     channel: ReminderChannel = Field(default=ReminderChannel.PUSH)

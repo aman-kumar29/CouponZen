@@ -70,16 +70,16 @@ def update_inbound_item_status(
     db.refresh(item)
     return item
 
-def update_inbound_item_metadata(
+def update_inbound_item_info(
     db: Session,
     item_id: str,
-    metadata: Dict[str, Any]
+    processing_info: Dict[str, Any]
 ) -> Optional[InboundItem]:
     item = get_inbound_item(db, item_id)
     if not item:
         return None
     
-    item.metadata = {**item.metadata, **metadata}
+    item.processing_info = {**item.processing_info, **processing_info}
     db.add(item)
     db.commit()
     db.refresh(item)

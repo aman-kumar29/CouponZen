@@ -11,7 +11,7 @@ def create_coupon(
     description: Optional[str] = None,
     expiry_date: Optional[str] = None,
     visibility: CouponVisibility = CouponVisibility.PRIVATE,
-    metadata: Optional[dict] = None,
+    meta_info: Optional[dict] = None,
 ) -> Coupon:
     coupon = Coupon(
         user_id=user_id,
@@ -19,7 +19,7 @@ def create_coupon(
         description=description,
         expiry_date=expiry_date,
         visibility=visibility,
-        metadata=metadata or {},
+        meta_info=meta_info or {},
         status=CouponStatus.ACTIVE
     )
     db.add(coupon)
@@ -57,7 +57,7 @@ def update_coupon(
     expiry_date: Optional[str] = None,
     visibility: Optional[CouponVisibility] = None,
     status: Optional[CouponStatus] = None,
-    metadata: Optional[dict] = None
+    meta_info: Optional[dict] = None
 ) -> Optional[Coupon]:
     coupon = get_coupon(db, coupon_id)
     if not coupon:
@@ -73,8 +73,8 @@ def update_coupon(
         coupon.visibility = visibility
     if status is not None:
         coupon.status = status
-    if metadata is not None:
-        coupon.metadata = {**coupon.metadata, **metadata}
+    if meta_info is not None:
+        coupon.meta_info = {**coupon.meta_info, **meta_info}
     
     db.add(coupon)
     db.commit()

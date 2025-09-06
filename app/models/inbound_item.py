@@ -14,16 +14,16 @@ class InboundItem(SQLModel, table=True):
         Index("idx_inbound_batch", "batch_id"),
     )
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True, index=True)
-    user_id: str = Field(foreign_key="users.id", index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
     source: CouponSource = Field()
     raw_text: Optional[str] = None
     raw_url: Optional[str] = None
     media_uri: Optional[str] = None  # screenshot path
     
     # Batch processing support
-    batch_id: Optional[str] = Field(default=None, index=True)
-    processing_metadata: Dict = Field(default={}, sa_column=Column(JSON))  # For storing processing details
+    batch_id: Optional[uuid.UUID] = Field(default=None, index=True)
+    processing_info: Dict = Field(default={}, sa_column=Column(JSON))  # For storing processing details
 
     status: ItemStatus = Field(default=ItemStatus.RECEIVED, nullable=False)
     error_message: Optional[str] = None
