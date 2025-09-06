@@ -1,25 +1,44 @@
 from sqlmodel import SQLModel, Field
-from sqlalchemy import UniqueConstraint, Index
-from typing import Optional
+from sqlalchemy import UniqueConstraint, Index, Column, JSON, ARRAY
+from typing import Optional, Dict, List
 from datetime import datetime, timezone
 import uuid
 from .enums import CouponSource
 
-class AppCoupon(SQLModel, table=True):
-    __tablename__ = "app_coupons"
+class Coupon(SQLModel, table=True):
+    """
+    Coupon model representing discount coupons in the system.
+    Single-column indexes are defined directly on fields using index=True.
+    Compound indexes are defined in __table_args__ as they span multiple columns.
+    """
+    __tablename__ = "coupons"
+    
+    # Define compound indexes and constraints that span multiple columns
+    __table_args__ = (
+        # Index for finding user's coupons by expiration
+        Index('idx_coupons_user_expires', 'user_id', 'expires_at'),
+        # Index for public coupon discovery
+        Index('idx_coupons_visibility_status', 'visibility', 'processing_status'),
+        # Ensure no duplicate coupons
+        UniqueConstraint('dedupe_hash', name='uq_coupons_dedupe')
+    )
 
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    user_id: str = Field(foreign_key="app_users.id", index=True)
-    inbound_item_id: Optional[str] = Field(default=None, foreign_key="app_inbound_items.id")
-    # Brand
-    brand: str = Field(nullable=False)
-    brand_id: Optional[uuid.UUID] = None  # future FK
+    # Primary keys and relationships
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True, index=True)
+    user_id: str = Field(foreign_key="users.id", index=True)
+    inbound_item_id: Optional[str] = Field(default=None, foreign_key="inbound_items.id")
+    
+    # Brand and Categories
+    brand: str = Field(index=True)
+    brand_id: Optional[str] = None  # future FK
+    categories: List[str] = Field(default=[], sa_column=Column(ARRAY(str)))  # For categorization
+    tags: List[str] = Field(default=[], sa_column=Column(ARRAY(str)))  # For flexible tagging
 
     # What users see
-    title: str = Field(nullable=False)
+    title: str
     description: Optional[str] = None
-    code: Optional[str] = None
-    source: CouponSource = Field(default=CouponSource.MANUAL, nullable=False)
+    code: Optional[str] = Field(default=None, index=True)
+    source: CouponSource = Field(default=CouponSource.MANUAL)
     url: Optional[str] = None
     image_uri: Optional[str] = None
 
@@ -34,16 +53,23 @@ class AppCoupon(SQLModel, table=True):
     discount_percent: Optional[int] = None
 
     # Metadata / state
-    terms: dict | None = Field(default=None, sa_column_kwargs={"nullable": True})
-    is_redeemed: bool = Field(default=False, nullable=False)
+    terms: Dict = Field(default={}, sa_column=Column(JSON))
+    metadata: Dict = Field(default={}, sa_column=Column(JSON))  # For extensible properties
+    is_redeemed: bool = Field(default=False)
     redeemed_at: Optional[datetime] = None
-    is_archived: bool = Field(default=False, nullable=False)
+    is_archived: bool = Field(default=False)
+    
+    # Validation and processing
+    validation_rules: Dict = Field(default={}, sa_column=Column(JSON))  # Custom validation rules
+    processing_status: str = Field(default="active")  # active, expired, invalid
+    error_message: Optional[str] = None
 
     # System
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    deleted_at: Optional[datetime] = None  # For soft delete
     dedupe_hash: Optional[str] = Field(default=None, unique=True)
-    version: int = Field(default=1, nullable=False)
+    version: int = Field(default=1)
 
     # Public sharing (future sprints—harmless now)
     visibility: Optional[str] = Field(default="PRIVATE")  # PRIVATE | PUBLIC | UNLISTED

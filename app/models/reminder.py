@@ -1,23 +1,31 @@
 from sqlmodel import SQLModel, Field
-from sqlalchemy import Index
-from typing import Optional
+from sqlalchemy import Index, Column, JSON
+from typing import Optional, Dict
 from datetime import datetime, timezone
 import uuid
 from .enums import ReminderChannel
 
-class AppReminder(SQLModel, table=True):
-    __tablename__ = "app_reminders"
+class Reminder(SQLModel, table=True):
+    __tablename__ = "reminders"
     __table_args__ = (
-        Index("idx_app_reminders_user_schedule", "user_id", "scheduled_at"),
-        Index("idx_app_reminders_coupon", "coupon_id"),
+        Index("idx_reminders_user_schedule", "user_id", "scheduled_at"),
+        Index("idx_reminders_coupon", "coupon_id"),
+        Index("idx_reminders_status", "status"),
     )
 
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    user_id: str = Field(foreign_key="app_users.id", index=True)
-    coupon_id: str = Field(foreign_key="app_coupons.id", index=True)
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True, index=True)
+    user_id: str = Field(foreign_key="users.id", index=True)
+    coupon_id: str = Field(foreign_key="coupons.id", index=True)
+    
+    # Notification details
     channel: ReminderChannel = Field(default=ReminderChannel.PUSH)
     scheduled_at: datetime = Field(index=True)
     sent_at: Optional[datetime] = None
+    
+    # Enhanced reminder features
+    message: Optional[str] = None  # Custom reminder message
+    status: str = Field(default="scheduled", index=True)  # scheduled, sent, failed, cancelled
+    preferences: Dict = Field(default={}, sa_column=Column(JSON))  # Channel-specific preferences
     
     cancelled_at: Optional[datetime] = None
     retry_count: int = Field(default=0, nullable=False)

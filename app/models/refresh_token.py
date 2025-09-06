@@ -4,7 +4,7 @@ from typing import Optional
 
 class RefreshToken(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    user_id: int = Field(foreign_key="app_users.id", index=True)
+    user_id: int = Field(foreign_key="users.id", index=True)
     token: str = Field(unique=True, index=True)
     expires_at: datetime = Field()
     revoked: bool = Field(default=False)
